@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import sys
 import os
 import errno
@@ -8,7 +10,7 @@ from subprocess import Popen, PIPE
 from cigar import Cigar
 from datetime import datetime
 
-#Beryl Cummings' code, modified slightly
+# Beryl Cummings' code, modified slightly
 def printSplices(spliceDict):
 	for key in spliceDict:
 		gene, gene_type, chrom, junctionStart, junctionEnd = key.split()
@@ -48,7 +50,7 @@ def parseCIGARForIntrons(cigar):
 
 	return offset, matchedExon, intronLength
 
-#run() was taken from Andy and modified:
+# run() was taken from Andy and modified:
 # http://jura.wi.mit.edu/bio/education/hot_topics/python_pipelines_2014/python_pipelines_2014.pdf
 # https://stackoverflow.com/questions/13398261/python-subprocess-call-and-subprocess-popen-stdout
 def run(cmd, dieOnError=True):
@@ -83,7 +85,7 @@ def intronDiscovery(poolArguement):
 
 		for line in stdout.splitlines():
 
-			elems = line.split()
+			elems = line.decode().split()
 
 			alignmentStart = int(elems[3])
 			cigar = str(elems[5])
@@ -108,7 +110,7 @@ def intronDiscovery(poolArguement):
 			junctionStart = alignmentStart + matchedExon + offset
 			junctionEnd = junctionStart + intronLength
 
-			# if spliceList gets too big and overflows RAM, then use this block to write to a file and process the genes from there
+			# if spliceList gets too big and overflows RAM, then use this block to write to a file and process the genes using SpliceJunctionSummary.py
 			# with open((gene + ".txt"), "a") as out:
 			# 	out.write("\t".join([str(gene), str(bam[:-4]), str(chrom), str(junctionStart), str(junctionEnd), str(matchedExon), str(intronLength)]) + "\n")
  			
@@ -123,12 +125,14 @@ def intronDiscovery(poolArguement):
 			else:
 				spliceDict[uniqueSplice][sample] += 1
 
+		del stdout # refer to this link for how Python handles ram use in loops: https://stackoverflow.com/questions/3305870/static-memory-in-python-do-loops-create-new-instances-of-variables-in-memory
+
 	if spliceDict:
 		printSplices(spliceDict)
 	else:
 		with open((gene + ".txt"), "w"):
 			print ('Empty file: ' + gene + ".txt")	# an empty file is created so that you can determine the progress of SpliceJunctionDiscovery.py by using 'ls | wc -l' on the current working directory
-								# i'm not kidding, manipulating stdout with multiple subprocesses is a nightmare
+													# i'm not kidding, manipulating stdout with multiple subprocesses is a nightmare
 
 	print ('finished ' + gene)
 
@@ -168,8 +172,8 @@ def processGenesInParallel(transcriptFile, bamList, numProcesses):
 			poolArguements.append((bamFiles, gene, gene_type, chrom, start, stop))
 
 	pool.map(intronDiscovery, poolArguements) # run the worker processes
-# 	pool.close()
-# 	pool.join()
+	pool.close()
+	pool.join()
 	
 if __name__=="__main__":
 
