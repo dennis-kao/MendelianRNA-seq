@@ -6,7 +6,7 @@ MendelianRNA-seq helps to discover splice sites in a sample given a list of bam 
 
 SpliceJunctionDiscovery.py usually takes the longest to execute because it calls upon samtools based on the number of samples * the number of regions of interest. This step is parallelized and the number of worker processes can specified in the torque file or as an arguement to the standalone script. This number should be equal to or less than the number of cores on your system.
 
-[MendelianRNA-seq-DB](https://github.com/dennis-kao/MendelianRNA-seq-DB) is a version of this tool which stores junction information in a database. The main benefit of this is that results can be reused do not have to be recomputed for previously processed BAM files. The tool also has a few additional features like a column for total read counts seen in control or patients bams for a specific junction and exon skipping detection. 
+[MendelianRNA-seq-DB](https://github.com/dennis-kao/MendelianRNA-seq-DB) is a version of this tool which stores junction information in a database. The main benefit of this is that results can be reused and do not have to be recomputed for previously processed BAM files. The tool also has a few additional features like a column for total read counts seen in control or patients bams for a specific junction and exon skipping detection. 
 
 ## Steps
 
