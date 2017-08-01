@@ -87,6 +87,12 @@ ZNF404	NEXON	19:44384341-44388442	40	1	40:SAMPLE	Neither annotated	-
 - CIGAR string parsing is handled by a function called parseCIGARForIntrons() whereas before CIGAR strings were handled by piping through multiple bash tools. As a result of improper parsing using bash tools, junction start and/or stop positions were not reported properly (i.e. 1:100-200*1D30 represents an alignment that should really be 1:100-230 or 1:100-231)
 - Junction flanking in NormalizeSpliceJunctionValues.py has been fixed and now works. When flanking junctions were added to the set in make_annotated_junction_set(), individual characters in the string were added as opposed to the entire string itself (i.e. 1:100-200 gets added as '1', ':', '0', '2', '-')
 
+## Citations
+
+[Improving genetic diagnosis in Mendelian disease with transcriptome sequencing](http://stm.sciencemag.org/content/9/386/eaal5209)
+
+Beryl Cumming's original scripts: [MendelianRNA-seq](https://github.com/berylc/MendelianRNA-seq)
+
 ## Footnotes
 
 The included transcript_model file [_gencode.comprehensive.splice.junctions.txt_](https://github.com/dennis-kao/MendelianRNA-seq/blob/master/gencode.comprehensive.splice.junctions.txt) is based off of gencode v19.
