@@ -13,28 +13,15 @@ then
 		exit 1
 fi
 
-if [ -z "$sample" ];
+if [ -z "transcript_model" ];
 then
-		echo "ERROR - Specify the name of the bam file you want to discover junctions specific to with the bam extension"
-		echo "E.x. findNovel.bam would be sample=findNovel"
-		exit 1
+	echo "Include a path to a transcript_model for junction annotation"
+	exit 1
 fi
 
 home=~/tools/MendelianRNA-seq
-
 name=`basename $transcriptFile`
 sjdOutput="All."$name".splicing.list"
-
-#	Optional parameters
-if [ -z "$minRead" ];
-then
-		minRead=10
-fi
-
-if [ -z "$threshold" ];
-then
-		threshold=0.5
-fi
 
 if [ -z "$processes" ];
 then
@@ -47,18 +34,13 @@ then
 fi
 
 normOutput="norm-"$sjdOutput
-filteredOutput="threshold"$threshold"_novel_"$sample"_norm_"$sjdOutput
 
-module load python/2.7.11
+module load python/3.5.2
 python ~/tools/MendelianRNA-seq/Analysis/SpliceJunctionDiscovery.py -transcriptFile=$transcriptFile -bamList=$bamList -processes=$processes
 
-if [ -z "transcript_model" ];
-then
-	$home/Analysis/NormalizeSpliceJunctionValues.py -transcript_model=$transcript_model -splice_file=$sjdOutput --normalize > $normOutput
-else
-	$home/Analysis/NormalizeSpliceJunctionValues.py -splice_file=$sjdOutput --normalize > $normOutput
-fi
+module load python/2.7.11
+$home/Analysis/NormalizeSpliceJunctionValues.py -transcript_model=$transcript_model -splice_file=$sjdOutput --normalize > $normOutput
 
 rm $sjdOutput
 
-cat $normOutput | grep $sample | awk "{ if (\$5 == 1 && \$4 >= $minread ) print \$0 }" | sed "s/:$sample//" | sed "s/:$sample//" | awk "{if (\$7 == \"Neither\" || \$9 > $threshold) print \$0}" > $filteredOutput
+# cat $normOutput | grep $sample | awk "{ if (\$5 == 1 && \$4 >= $minread ) print \$0 }" | sed "s/:$sample//" | sed "s/:$sample//" | awk "{if (\$7 == \"Neither\" || \$9 > $threshold) print \$0}" > $filteredOutput
