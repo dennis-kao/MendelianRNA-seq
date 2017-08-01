@@ -63,6 +63,9 @@ cat kidney.glomerular.genes.bed | awk '{print $4"\t"$4"\t+\t"$1"\t"$2"\t"$3"\tNE
 
 		
 			#PBS -l walltime=10:00:00,nodes=1:ppn=10
+	4. sjdOutput, the file produced from SpliceJunctionDiscovery.py. The name of this file is always 'All.' + transcriptFile + '.splicing.list'
+	5. transcript_model, path to file #4
+	6. normOutput, the name of a file in which NormalizeSpliceJunctionValues.py writes its output to. You can remove this to have the script write to stdout
 
 4. Use FilterSpliceJunctions.py on the file produced by the normalization script. The methododology on how to filter out splice junctions is entirely up to you. You can filter junctions based on read count, specificity to a sample, normalized read count, gene and more. For my research purposes, I often filtered out junctions with a read count less than 5, a normalized read count less than 0.05 and were present in GTEx samples. Having a gene panel, that is a list of genes or regions you suspect has the causative mutation, is very helpful in cutting down the number of splice sites.
 
@@ -97,8 +100,8 @@ ZNF404	NEXON	19:44384341-44388442	40	1	40:SAMPLE	Neither annotated	-
 **SpliceJunctionDiscovery.sh and SpliceJunctionSummary.py have been rewritten and condensed in a single script called SpliceJunctionDiscovery.py. A small bug in NormalizeSpliceJunctionValues.py has been fixed. No other scripts have been modified. SpliceJunctionDiscovery still outputs a text file that works with Beryl's NormalizeSpliceJunctionValues.py and FilterSpliceJunctions.py scripts.**
 
 - SpliceJunctionDiscovery has been rewritten in Python and parallelized - decreasing processing time by a factor proprotional to the number of worker processes
-- CIGAR string parsing is handled by a function called parseCIGARForIntrons() whereas before CIGAR strings were handled by piping through multiple bash tools. As a result of improper parsing using bash tools, junction start and/or stop positions were not reported properly (i.e. 1:100-200*1D30 represents an alignment that should really be 1:100-230 or 1:100-231)
-- Junction flanking in NormalizeSpliceJunctionValues.py has been fixed and now works. When flanking junctions were added to the set in the original make_annotated_junction_set(), individual characters in the string were added as opposed to the entire string itself (i.e. 1:100-200 gets added as '1', ':', '0', '2', '-')
+- CIGAR string parsing is handled by a function called parseCIGARForIntrons() whereas before CIGAR strings were handled by piping through multiple bash tools. As a result of improper parsing using bash tools, junction start and/or stop positions were not reported properly (e.x. 1:100-200*1D30 represents an alignment that should really be 1:100-230 or 1:100-231)
+- Junction flanking in NormalizeSpliceJunctionValues.py has been fixed and now works. When flanking junctions were added to the set in the original make_annotated_junction_set(), individual characters in the string were added as opposed to the entire string itself (e.x. 1:100-200 gets added as '1', ':', '0', '2', '-')
 
 ## Citations
 
