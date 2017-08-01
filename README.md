@@ -2,15 +2,20 @@
 
 #### Modification of Beryl Cummings scripts for discovering novel splicing events through RNA-seq
 
-MendelianRNA-seq helps to discover splice sites in a sample given a list of bam files. SpliceJunctionDiscovery.py calls upon samtools to report the presence of introns in a list of regions of interest and summarizes these results for read count. NormalizeSpliceJunctionValues.py normalizes the read count of each site based on read support from nearby junctions. FilterSpliceJunctions.py then can be used to added OMIM annotations, filter out sites that are of low quality and/or are present in a given number of samples, and much more.
-
-SpliceJunctionDiscovery.py usually takes the longest to execute because it calls upon samtools based on the number of samples * the number of regions of interest. This step is parallelized and the number of worker processes can specified in the torque file or as an arguement to the standalone script. This number should be equal to or less than the number of cores on your system.
+MendelianRNA-seq is a collection of scripts to help to discover splice sites in a sample given a list of bam files. 
 
 [MendelianRNA-seq-DB](https://github.com/dennis-kao/MendelianRNA-seq-DB) is a version of this tool which stores junction information in a database. The main benefit of this is that results can be reused and do not have to be recomputed for previously processed BAM files. The tool also has a few additional features like a column for total read counts seen in control or patients bams for a specific junction and exon skipping detection. 
 
+## Pipeline
+
+SpliceJunctionDiscovery.py calls upon samtools to report the presence of introns in a list of regions of interest and summarizes these results for read count. NormalizeSpliceJunctionValues.py normalizes the read count of each site based on read support from nearby junctions. FilterSpliceJunctions.py then can be used to added OMIM annotations, filter out sites that are of low quality and/or are present in a given number of samples, and much more.
+
+SpliceJunctionDiscovery.py usually takes the longest to execute because it calls upon samtools based on the number of samples * the number of regions of interest. This step is parallelized and the number of worker processes can specified in the torque file or as an arguement to the standalone script. This number should be equal to or less than the number of cores on your system.
+
 ## Steps
 
-1. Run bcbio RNA-seq pipeline to get bam files
+1. Run a RNA-seq pipeline to get some bam files. Also generate their corresponding .bai files. This can be done with a single line in bash:
+```parallel  samtools index ::: *.bam```
 
 2. Create a list of genes of interest (muscular or kidney), in the format:
 	
