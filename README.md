@@ -2,7 +2,7 @@
 
 #### Modification of Beryl Cummings' scripts for discovering novel splicing events through RNA-seq
 
-MendelianRNA-seq is a collection of scripts to help to discover splice sites in a collection of bam files. It is a rewrite of Beryl Cummings' SpliceJunctionDiscover.sh and SpliceJunctionSummary.py to support parallel processing. It should be used if you want to process 10 bams or less.
+MendelianRNA-seq is a collection of scripts to help to discover splice sites in a list of bam files. It is a rewrite of Beryl Cummings' original [MendelianRNA-seq](https://github.com/berylc/MendelianRNA-seq) to support parallel processing. It should be used if you want to process 10 bams or less.
 
 [MendelianRNA-seq-DB](https://github.com/dennis-kao/MendelianRNA-seq-DB) is a version of this tool which stores junction information in a database. The main benefit of this is that results from previously processed bam files can be reused and there is a much lower ram usage. The tool also has a few additional features such as fields like total_patient_read_count and n_gtex_seen and exon skipping detection.
 
