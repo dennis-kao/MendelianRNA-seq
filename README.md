@@ -81,7 +81,7 @@ ZNF404	NEXON	19:44384341-44388442	40	1	40:SAMPLE	Neither annotated	-
 ```
 ## Differences between this MendelianRNA-seq and Beryl Cumming's original MendelianRNA-seq
 
-**SpliceJunctionDiscovery has been entirely rewritten in Python and a small bug in NormalizeSpliceJunctionValues.py has been fixed. No other scripts have been modified. SpliceJunctionDiscovery still outputs a text file that works with Beryl's NormalizeSpliceJunctionValues.py and FilterSpliceJunctions.py scripts.**
+**SpliceJunctionDiscovery.sh and SpliceJunctionSummary.py have been rewritten and condensed in a single script called SpliceJunctionDiscovery.py. A small bug in NormalizeSpliceJunctionValues.py has been fixed. No other scripts have been modified. SpliceJunctionDiscovery still outputs a text file that works with Beryl's NormalizeSpliceJunctionValues.py and FilterSpliceJunctions.py scripts.**
 
 - SpliceJunctionDiscovery has been rewritten in Python and parallelized - decreasing processing time by a factor proprotional to the number of worker processes
 - CIGAR string parsing is handled by a function called parseCIGARForIntrons() whereas before CIGAR strings were handled by piping through multiple bash tools. As a result of improper parsing using bash tools, junction start and/or stop positions were not reported properly (i.e. 1:100-200*1D30 represents an alignment that should really be 1:100-230 or 1:100-231)
