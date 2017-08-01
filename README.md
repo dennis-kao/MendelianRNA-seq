@@ -14,74 +14,57 @@ SpliceJunctionDiscovery.py is the script that takes the longest to execute. It c
 
 ## Required files
 
-1. BAM (and BAI) files produced from an RNA-seq pipeline - You need a sufficient number of high quality control BAMs so that you can filter out more splice junctions and discover those that are specific to a diseased sample. The [GTEx project](https://www.gtexportal.org/home/) is a good resource for control BAMs. These BAM files should all be from the same tissue due to tissue specific expression. A way to test for contaminated tissue samples has been described in the study cited below. You can also generate .bai files from .bam files using this line: ```parallel  samtools index ::: *.bam```
+1. .bam (and .bai) files produced from an RNA-seq pipeline - You need a sufficient number of high quality control BAMs so that you can filter out more splice junctions and discover those that are specific to a diseased sample. The [GTEx project](https://www.gtexportal.org/home/) is a good resource for control BAMs. These BAM files should all be from the same tissue due to tissue specific expression. A way to test for contaminated tissue samples has been described in the study cited below. Note that you can generate .bai files from .bam files using this line: ```parallel  samtools index ::: *.bam```
 
-2. gene_list - A text file containing a list of genes and their spanning chromosome positions that you want to discover junctions in:
+2. transcript_file - A text file containing a list of genes and their spanning chromosome positions that you want to discover junctions in:
 	```
 	GENE	ENSG	STRAND	CHROM	START	STOP	GENE_TYPE
 	```
-You can use [genes.R](https://github.com/naumenko-sa/bioscripts/blob/master/genes.R) for that, or convert an existing .bed file using this bash line:
+	You can use [genes.R](https://github.com/naumenko-sa/bioscripts/blob/master/genes.R) for that, or convert an existing .bed file using this bash line:
 ```
 cat kidney.glomerular.genes.bed | awk '{print $4"\t"$4"\t+\t"$1"\t"$2"\t"$3"\tNEXONS"}' >> gene.list
 ```
-
-3. bamlist - A text file containing the names of all the bams you want to discover junctions in. The file should quite simply be:
-
-		```
+3. bamlist.list - A file containing the names of all the bams you want to discover junctions in. The file should quite simply be:
+	
+	
 		G65693.GTEX.8TY6-5R5T.2.bam
 		G55612.GTEX.7G54-3GS8.1.bam
 		G09321.GTEX.0EYJ-9E12.3.bam
 		PATIENT.bam
-		```
-An easy way to generate this file would be to navigate to a directory containing the .bam files you want to use and running this line: ```ls *.bam | grep '' > bamlist.list```
+	
+	
+	An easy way to generate this file would be to navigate to a directory containing the .bam files you want to use and running this line: ```ls *.bam | grep '' > bamlist.list```
 
-4. transcript_model - A text file containing a list of junctions. These will be used to evaluate a junction's annotation (none, one, both) and it's normalization calculation. You can use your own, or use the [included file](gencode.comprehensive.splice.junctions.txt). This file is based off of junctions from gencode v19.
+4. transcript_model - A text file containing a list of known canonical splice junctions. These will be used to evaluate a junction's annotation (none, one, both) and it's annotated normalization calculation. You can use your own, or use the [included file](gencode.comprehensive.splice.junctions.txt). This file contains junctions from gencode v19.
 
 ## Steps
 
-1. Get all the files you need as listed above and put them in a seperate directory. Navigate to it. NOTE: there should not be any .txt files present beforehand in order for SpliceJunctionDiscovery.py to run correctly.
+1. Put bamlist.list, .bam files, .bai files in a seperate directory. Navigate to it. 
+	NOTE: there should not be any .txt files present beforehand in order for SpliceJunctionDiscovery.py to run correctly.
 
 2. For [Torque](http://www.adaptivecomputing.com/products/open-source/torque/) users there is a [PBS file](Analysis/rnaseq.novel_splice_junction_discovery.pbs) containing all the commands you need to run. Just change the "home" directory in the file to match where you placed the MendelianRNA-seq folder and run: 
 
-	```qsub MendelianRNA-seq/Analysis/rnaseq.novel_splice_junction_discovery.pbs -v transcriptFile=kidney.glomerular.genes.list,bamList=bamlist.list,sample=sampName```
+	```qsub MendelianRNA-seq/Analysis/rnaseq.novel_splice_junction_discovery.pbs -v transcriptFile=gene.list,bamList=bamlist.list```
 
 	Parameters:
-	1. transcriptFile, path to file produced in step 2
-	2. bam_list
-	3. sample, the name of the bam file you want to find novel junctions in, without the ".bam" extension. For example, if your file name is "findNovel.bam", then write "sample=findNovel"
-
-	Optional parameters:
-	1. minread, the minimum number of reads a junction needs to have (default=10)
-	2. threshold, the minimum normalized read count a junction needs to have (default=0.5)
-	3. [transcript_model](https://github.com/dennis-kao/MendelianRNA-seq/blob/master/gencode.comprehensive.splice.junctions.txt), the absolute path to a text file containing a list of known canonical splice junctions (default=/home/dennis.kao/tools/MendelianRNA-seq/gencode.comprehensive.splice.junctions.txt). This file is used in NormalizeSpliceJunctionValues.py.
-	4. processes, the number of worker processes running in the background calling samtools. This the slowest step in the program. This number should be equal to or less than the number of cores on your machine. 
+	1. transcriptFile, path to required file #2
+	2. bamList, path to file #3
+	3. processes, the number of worker processes running in the background calling samtools. This the slowest step in the program. This number should be equal to or less than the number of cores on your machine. 
 	
 		For torque users: This number should also be equal to or less than the number specified for ppn in rnaseq.novel_splice_junction_discovery.pbs:
 
 		
 			#PBS -l walltime=10:00:00,nodes=1:ppn=10
 
-4. (Optional) By default the pipeline automatically generates a file with filtered results based on the following torque parameters: sample, threshold and minread. The filtered file only has splice sites which are specific to one given sample (sample), have a minimum normalized read count (threshold) and have a minimum read count (minread). However, as a researcher, you may look to filter your dataset in multiple ways according to coverage, diagnosis, etc. 
-
-	For a more comprehensive tool, use FilterSpliceJunctions.py on the file produced by the normalization script. Great documentation on how to use the script can be found near the end of this [blog post](https://macarthurlab.org/2017/05/31/improving-genetic-diagnosis-in-mendelian-disease-with-transcriptome-sequencing-a-walk-through/). 
+4. Use FilterSpliceJunctions.py on the file produced by the normalization script. Great documentation on how to use the script can be found near the end of this [blog post](https://macarthurlab.org/2017/05/31/improving-genetic-diagnosis-in-mendelian-disease-with-transcriptome-sequencing-a-walk-through/). 
 
 ## Output
 
-The scripts output 2 files:
+The scripts output a single file:
 
-norm-All.**kidney.glomerular.genes**.list, (where kidney.glomerular.genes is the name of your transcriptFile) 
+norm-All.**transcript_file**.list, (where transcript_file is the name of require file #2) 
 
-which contains all splice site information pertaining to all samples with a column for normalized read counts,
-
-and
-
-threshold**X.XX**\_novel\_**sampleName**\_norm\_**All.kidney.glomerular.genes.list**.splicing.txt, (where X.XX is the threshold value, sampleName is the sample you want to discover novel junctions in, and All.kidney.glomerular.genes.list is the name of the input file) 
-
-which contains splice sites only seen in sampleName that have a read count > minRead and a normalized read count > threshold.
-
-The "threshold" file contains text information in the format:
-
-```GENE	GENE_TYPE	CHROM:START-STOP	READ_COUNT	SAMPLES_SEEN	READ_COUNT:SAMPLE	SITES_ANNOTATED	NORM_READ_COUNT:SAMPLE```
+which contains all splice site information pertaining to all samples with a column for normalized read counts.
 
 Here is a sample output:
 
