@@ -79,6 +79,13 @@ YIPF7	NEXON	4:44631580-44637960	21	1	21:SAMPLE	Neither annotated	-
 ZNF331	NEXON	19:54041790-54042480	15	1	15:SAMPLE	One annotated	15.0:SAMPLE
 ZNF404	NEXON	19:44384341-44388442	40	1	40:SAMPLE	Neither annotated	-
 ```
+## Differences between this MendelianRNA-seq and Beryl Cumming's original MendelianRNA-seq
+
+** SpliceJunctionDiscovery has been entirely rewritten in Python and a small bug in NormalizeSpliceJunctionValues.py has been fixed. No other scripts have been modified. SpliceJunctionDiscovery still outputs a text file that works with Beryl's NormalizeSpliceJunctionValues.py and FilterSpliceJunctions.py scripts. **
+
+- SpliceJunctionDiscovery has been rewritten in Python and parallelized - decreasing processing time by a factor proprotional to the number of worker processes
+- CIGAR string parsing is handled by a function called parseCIGARForIntrons() whereas before CIGAR strings were handled by piping through multiple bash tools. As a result of improper parsing using bash tools, junction start and/or stop positions were not reported properly (i.e. 1:100-200*1D30 represents an alignment that should really be 1:100-230 or 1:100-231)
+- Junction flanking in NormalizeSpliceJunctionValues.py has been fixed and now works. When flanking junctions were added to the set in make_annotated_junction_set(), individual characters in the string were added as opposed to the entire string itself (i.e. 1:100-200 gets added as '1', ':', '0', '2', '-')
 
 ## Footnotes
 
