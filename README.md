@@ -2,45 +2,52 @@
 
 #### Modification of Beryl Cummings scripts for discovering novel splicing events through RNA-seq
 
-MendelianRNA-seq is a collection of scripts to help to discover splice sites in a sample given a list of bam files. 
+MendelianRNA-seq is a collection of scripts to help to discover splice sites in a list of bam files. 
 
 [MendelianRNA-seq-DB](https://github.com/dennis-kao/MendelianRNA-seq-DB) is a version of this tool which stores junction information in a database. The main benefit of this is that results can be reused and do not have to be recomputed for previously processed BAM files. The tool also has a few additional features like a column for total read counts seen in control or patients bams for a specific junction and exon skipping detection. 
 
 ## Pipeline
 
-SpliceJunctionDiscovery.py calls upon samtools to report the presence of introns in a list of regions of interest and summarizes these results for read count. NormalizeSpliceJunctionValues.py normalizes the read count of each site based on read support from nearby junctions. FilterSpliceJunctions.py then can be used to added OMIM annotations, filter out sites that are of low quality and/or are present in a given number of samples, and much more.
+SpliceJunctionDiscovery.py calls upon samtools to report the presence of introns in a list of regions of interest, summarizes their read counts, and writes this to a text file. NormalizeSpliceJunctionValues.py reads this text file, normalizes the read counts of each site based on read support from annotated junctions, and adds this as an additional column to the file. FilterSpliceJunctions.py can then be used to added OMIM annotations, filter out sites that are of low quality and/or are present in a given number of samples, and much more.
 
-SpliceJunctionDiscovery.py usually takes the longest to execute because it calls upon samtools based on the number of samples * the number of regions of interest. This step is parallelized and the number of worker processes can specified in the torque file or as an arguement to the standalone script. This number should be equal to or less than the number of cores on your system.
+SpliceJunctionDiscovery.py is the script that takes the longest to execute. It calls upon samtools based on the number of BAMs * the number of regions of interest. This step is parallelized and the number of worker processes can specified in the torque file or as an arguement to the standalone script. This number should be equal to or less than the number of cores on your system.
+
+## Required files
+
+1. BAM (and BAI) files produced from an RNA-seq pipeline - You need a sufficient number of high quality control BAMs so that you can filter out more splice junctions and discover those that are specific to a diseased sample. The [GTEx project](https://www.gtexportal.org/home/) is a good resource for control BAMs. These BAM files should all be from the same tissue due to tissue specific expression. A way to test for contaminated tissue samples has been described in the study cited below. You can also generate .bai files from .bam files using this line: ```parallel  samtools index ::: *.bam```
+
+2. gene_list - A text file containing a list of genes and their spanning chromosome positions that you want to discover junctions in:
+	```
+	GENE	ENSG	STRAND	CHROM	START	STOP	GENE_TYPE
+	```
+You can use [genes.R](https://github.com/naumenko-sa/bioscripts/blob/master/genes.R) for that, or convert an existing .bed file using this bash line:
+```
+cat kidney.glomerular.genes.bed | awk '{print $4"\t"$4"\t+\t"$1"\t"$2"\t"$3"\tNEXONS"}' >> gene.list
+```
+
+3. bamlist - A text file containing the names of all the bams you want to discover junctions in. The file should quite simply be:
+
+		```
+		G65693.GTEX.8TY6-5R5T.2.bam
+		G55612.GTEX.7G54-3GS8.1.bam
+		G09321.GTEX.0EYJ-9E12.3.bam
+		PATIENT.bam
+		```
+An easy way to generate this file would be to navigate to a directory containing the .bam files you want to use and running this line: ```ls *.bam | grep '' > bamlist.list```
+
+4. transcript_model - A text file containing a list of junctions. These will be used to evaluate a junction's annotation (none, one, both) and it's normalization calculation. You can use your own, or use the [included file](gencode.comprehensive.splice.junctions.txt). This file is based off of junctions from gencode v19.
 
 ## Steps
 
-1. Run a RNA-seq pipeline to get some bam files. Also generate their corresponding .bai files. This can be done with a single line in bash:
-```parallel  samtools index ::: *.bam```
+1. Get all the files you need as listed above and put them in a seperate directory. Navigate to it. NOTE: there should not be any .txt files present beforehand in order for SpliceJunctionDiscovery.py to run correctly.
 
-2. Create a list of genes of interest (muscular or kidney), in the format:
-	
-	```GENE	ENSG	STRAND	CHROM	START	STOP	NEXONS```
-
-	use [genes.R](https://github.com/naumenko-sa/bioscripts/blob/master/genes.R) for that.
-
-	Some ready list are in data folder.
-
-	```cat kidney.glomerular.genes.bed | awk '{print $4"\t"$4"\t+\t"$1"\t"$2"\t"$3"\tNEXONS"}' >> kidney.glomerular.genes.list```
-
-3. Make and/or navigate to a directory containing all your .bam and corresponding .bai files. Run the [novel splice junction discovery script](https://github.com/dennis-kao/MendelianRNA-seq/blob/master/Analysis/rnaseq.novel_splice_junction_discovery.pbs). NOTE: there should not be any .txt files present beforehand in order for SpliceJunctionDiscovery.py to run correctly.
+2. For [Torque](http://www.adaptivecomputing.com/products/open-source/torque/) users there is a [PBS file](Analysis/rnaseq.novel_splice_junction_discovery.pbs) containing all the commands you need to run. Just change the "home" directory in the file to match where you placed the MendelianRNA-seq folder and run: 
 
 	```qsub MendelianRNA-seq/Analysis/rnaseq.novel_splice_junction_discovery.pbs -v transcriptFile=kidney.glomerular.genes.list,bamList=bamlist.list,sample=sampName```
 
-	Mandatory parameters:
+	Parameters:
 	1. transcriptFile, path to file produced in step 2
-	2. bamList, a text file containing the names of all bam files used in the analysis, each on a seperate line. For example:
-
-		```
-		control1.bam
-		control2.bam
-		control3.bam
-		findNovel.bam
-		```
+	2. bam_list
 	3. sample, the name of the bam file you want to find novel junctions in, without the ".bam" extension. For example, if your file name is "findNovel.bam", then write "sample=findNovel"
 
 	Optional parameters:
