@@ -8,7 +8,7 @@ MendelianRNA-seq is a collection of scripts to help to discover splice sites in 
 
 ## Pipeline
 
-SpliceJunctionDiscovery.py calls upon samtools to report the presence of introns in a list of regions of interest, summarizes their read counts, and writes this to a text file. NormalizeSpliceJunctionValues.py reads this text file, normalizes the read counts of each site based on read support from annotated junctions, and adds this as an additional column to the file. FilterSpliceJunctions.py can then be used to added OMIM annotations, filter out sites that are of low quality and/or are present in a given number of samples, and much more.
+SpliceJunctionDiscovery.py calls upon samtools to report the presence of introns in a list of regions of interest, summarizes their read counts, and writes this to a text file. NormalizeSpliceJunctionValues.py reads this text file, normalizes the read counts of each site based on read support from annotated junctions, and adds this information as an additional column to the file. FilterSpliceJunctions.py can then be used to added OMIM annotations, filter out sites that are of low quality and/or are present in a given number of samples, and much more.
 
 SpliceJunctionDiscovery.py is the script that takes the longest to execute. It calls upon samtools based on the number of BAMs * the number of regions of interest. This step is parallelized and the number of worker processes can specified in the torque file or as an arguement to the standalone script. This number should be equal to or less than the number of cores on your system.
 
