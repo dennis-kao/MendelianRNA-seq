@@ -80,17 +80,20 @@ cat kidney.glomerular.genes.bed | awk '{print $4"\t"$4"\t+\t"$1"\t"$2"\t"$3"\tNE
 SpliceJunctionDiscovery.py is the script which takes the longest to execute and consumes the most ram. The bulk of the scripts's execution is the worker function intronDiscovery(). The function loops through each BAM file and runs ```samtools view``` to a gene region specified in transcript_file.
 
 Runtime in SpliceJunctionDiscovery is largely a function of:
-a. the number of bam files
-b. the number of reported junctions in a gene region (correlated with a sample's coverage)
-c. the number of gene regions to investigate and their spanning size
-d. the number of worker processes
-
+<ol type="a">
+	<li>the number of bam files</li>
+	<li>the number of reported junctions in a gene region (correlated with a sample's coverage)</li>
+	<li>the number of gene regions to investigate and their spanning size</li>
+	<li>the number of worker processes</li>
+</ol>
 Therefore, runtime ~= a x b x c / d
 
 RAM use in SpliceJunctionDiscovery is largely a function of:
-a. the number of bam files
-b. the number of unique reported junctions in a sample pertaining to a specified gene region in transcript_file (somewhat correlated with a sample's coverage)
-c. the number of worker processes
+<ol type="a">
+	<li>the number of bam files</li>
+	<li>the number of unique reported junctions in a sample pertaining to a specified gene region in transcript_file (somewhat correlated with a sample's coverage)</li>
+	<li>the number of worker processes</li>
+</ol>
 
 Therefore, RAM use ~= a x b x c
 
