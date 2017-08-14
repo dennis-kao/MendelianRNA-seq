@@ -39,9 +39,9 @@ cat kidney.glomerular.genes.bed | awk '{print $4"\t"$4"\t+\t"$1"\t"$2"\t"$3"\tNE
 
 4. transcript_model - A text file containing a list of known canonical splice junctions. These will be used to evaluate a junction's annotation (none, one, both) and it's annotated normalization calculation. You can use your own, or use the [included file](gencode.comprehensive.splice.junctions.txt). This file contains junctions from gencode v19.
 
-5. Python 3.5.2
+5. [Python 3.5.2](https://www.python.org/downloads/) or higher
 
-6. Python [CIGAR string library](https://pypi.python.org/pypi/cigar/0.1.3)
+6. Python [CIGAR string library](https://pypi.python.org/pypi/cigar/0.1.3) by Brent Pedersen
 
 ## Steps
 
