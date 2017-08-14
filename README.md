@@ -86,6 +86,7 @@ Runtime in SpliceJunctionDiscovery is largely a function of:
 	<li>the number of gene regions to investigate and their spanning size</li>
 	<li>the number of worker processes</li>
 </ol>
+
 Therefore, runtime ~= a x b x c / d
 
 RAM use in SpliceJunctionDiscovery is largely a function of:
