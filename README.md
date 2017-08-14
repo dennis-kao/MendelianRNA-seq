@@ -71,11 +71,26 @@ cat kidney.glomerular.genes.bed | awk '{print $4"\t"$4"\t+\t"$1"\t"$2"\t"$3"\tNE
 
 	Great documentation on how to use FilterSpliceJunctions.py can be found near the end of this [blog post](https://macarthurlab.org/2017/05/31/improving-genetic-diagnosis-in-mendelian-disease-with-transcriptome-sequencing-a-walk-through/) by Beryl Cumming.
 
-## RAM use in SpliceJunctionDiscovery and runtime
+## Space time complexity in SpliceJunctionDiscovery.py
 
-RAM use in SpliceJunctionDiscovery is largely a function of the number of bam files, the number of unqiue splice sites pertaining to a specified gene region in transcript_file (somewhat correlated with coverage) and the number of worker processes. In my experience, with 4 bam files (3 GTEx and 1 patient) and 10 worker processes, ram use leveled out at a constant 35 GB. SpliceJunctionDiscovery completed within 30 minutes. 
+SpliceJunctionDiscovery.py is the script which takes the longest to execute and consumes the most ram. The bulk of the scripts's execution is the worker function intronDiscovery(). The function loops through each BAM file and runs ```samtools view``` to a gene region specified in transcript_file.
 
-The reason for high ram use is that junctions across all samples in a specified gene region are being stored in a single Python dictionary, spliceDict. If you look at the function each worker process goes through, intronDiscovery(), you will notice the loop through each BAM file and the samtools view call to a chromosome region specified in transcript_file.
+Runtime in SpliceJunctionDiscovery is largely a function of:
+a. the number of bam files
+b. the number of reported junctions in a gene region (correlated with a sample's coverage)
+c. the number of gene regions to investigate and their spanning size
+d. the number of worker processes
+
+Therefore, runtime ~= a x b x c / d
+
+RAM use in SpliceJunctionDiscovery is largely a function of:
+a. the number of bam files
+b. the number of unique reported junctions in a sample pertaining to a specified gene region in transcript_file (somewhat correlated with a sample's coverage)
+c. the number of worker processes
+
+Therefore, RAM use ~= a x b x c
+
+In my experience, with 4 bam files (3 GTEx and 1 patient) and 10 worker processes, ram use leveled out at a constant 35 GB. SpliceJunctionDiscovery completed within 35 minutes.  
 
 If RAM use is an issue and/or you are going to process more than 10 BAM files, you should consider using a smaller number of worker processes or use [MendelianRNA-seq-DB](https://github.com/dennis-kao/MendelianRNA-seq-DB) instead.
 
